@@ -5,7 +5,7 @@ metadata:
   labels:
     app: django
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: django
     tier: web
@@ -13,4 +13,3 @@ spec:
     - name: http
       port: 8000
       targetPort: 8000
-      nodePort: 30252

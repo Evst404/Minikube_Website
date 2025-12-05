@@ -17,3 +17,24 @@ kubectl wait --for=condition=Available deploy/django-web --timeout=120s
 ```
 
 Сервис будет доступен через `minikube service django --url` (для Docker-драйвера на macOS) или по NodePort/Ingress в других конфигурациях.
+
+### Ingress
+
+1. Включите ingress-контроллер в minikube:
+   ```bash
+   minikube addons enable ingress
+   ```
+2. Добавьте запись в `/etc/hosts`, чтобы домен указывал на IP minikube:
+   ```bash
+   echo "$(minikube ip) star-burger.test" | sudo tee -a /etc/hosts
+   ```
+3. Примените манифесты:
+   ```bash
+   kubectl apply -f kubernetes
+   kubectl wait --for=condition=Available deploy/django-web --timeout=120s
+   ```
+4. Откройте сайт: `http://star-burger.test/` (порт 80, без port-forward).
+
+Примечания:
+- Сервис `django` имеет тип `ClusterIP`, внешняя точка входа — только через Ingress.
+- В `Deployment` выставлен `DEBUG="False"`. Для временного включения отладки измените значение и снова выполните `kubectl apply -f kubernetes`.
