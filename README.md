@@ -86,6 +86,6 @@ $ docker compose build web
 
 ### Регулярная очистка сессий
 - Разовый запуск: `kubectl apply -f kubernetes/django-clearsessions-pod.yaml`.
-- Регулярный запуск: `kubectl apply -f kubernetes/django-clearsessions-cronjob.yaml` (по расписанию `0 3 * * *`).
+- Регулярный запуск: `kubectl apply -f kubernetes/django-clearsessions-cronjob.yaml` (по расписанию `0 3 * * *`, `startingDeadlineSeconds=600`, `ttlSecondsAfterFinished=120`).
 - Принудительно запустить job из cronjob: `kubectl create job django-clearsessions-once --from=cronjob/django-clearsessions`.
 - Проверить состояние: `kubectl get cronjobs`, `kubectl get jobs`, `kubectl logs job/django-clearsessions-once`.

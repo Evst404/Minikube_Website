@@ -7,11 +7,13 @@ metadata:
     task: clearsessions
 spec:
   schedule: "0 3 * * *"
+  startingDeadlineSeconds: 600
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
+      ttlSecondsAfterFinished: 120
       backoffLimit: 1
       template:
         spec:

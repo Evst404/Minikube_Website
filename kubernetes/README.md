@@ -43,7 +43,7 @@ kubectl wait --for=condition=Available deploy/django-web --timeout=120s
 ### Очистка устаревших сессий
 
 - Разовый под: `kubectl apply -f kubernetes/django-clearsessions-pod.yaml` (вызывает `manage.py clearsessions`, не рестартится).
-- Регулярно (cronjob): `kubectl apply -f kubernetes/django-clearsessions-cronjob.yaml` — расписание `0 3 * * *`, `concurrencyPolicy: Forbid`.
+- Регулярно (cronjob): `kubectl apply -f kubernetes/django-clearsessions-cronjob.yaml` — расписание `0 3 * * *`, `concurrencyPolicy: Forbid`, `startingDeadlineSeconds: 600`, `ttlSecondsAfterFinished: 120`.
 - Принудительно создать job из cronjob: `kubectl create job django-clearsessions-once --from=cronjob/django-clearsessions`.
 - Проверка: `kubectl get cronjobs`, `kubectl get jobs`, `kubectl logs job/django-clearsessions-once`.
 
