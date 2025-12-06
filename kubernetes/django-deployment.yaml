@@ -38,4 +38,4 @@ spec:
             - name: DEBUG
               value: "False"
             - name: ALLOWED_HOSTS
-              value: "127.0.0.1,localhost,192.168.49.2"
+              value: "127.0.0.1,localhost,192.168.49.2,star-burger.test"

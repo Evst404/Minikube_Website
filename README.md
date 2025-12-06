@@ -75,3 +75,11 @@ $ docker compose build web
 `ALLOWED_HOSTS` -- настройка Django со списком разрешённых адресов. Если запрос прилетит на другой адрес, то сайт ответит ошибкой 400. Можно перечислить несколько адресов через запятую, например `127.0.0.1,192.168.0.1,site.test`. [Документация Django](https://docs.djangoproject.com/en/3.2/ref/settings/#allowed-hosts).
 
 `DATABASE_URL` -- адрес для подключения к базе данных PostgreSQL. Другие СУБД сайт не поддерживает. [Формат записи](https://github.com/jacobian/dj-database-url#url-schema).
+
+## Развёртывание в Minikube через Ingress
+
+1. Включите nginx ingress-контроллер: `minikube addons enable ingress`.
+2. Соберите образ, доступный Minikube (например, через `minikube image build -t django_app backend_main_django`) и подготовьте секреты по инструкции из `kubernetes/README.md`.
+3. Примените манифесты: `kubectl apply -f kubernetes` и дождитесь готовности деплоймента `kubectl wait --for=condition=Available deploy/django-web --timeout=120s`.
+4. Пропишите домен в `/etc/hosts`, чтобы он смотрел на IP Minikube: `echo "$(minikube ip) star-burger.test" | sudo tee -a /etc/hosts`.
+5. Откройте сайт по адресу `http://star-burger.test` — ingress слушает стандартный порт 80, сервис `django` остаётся `ClusterIP` без публичных портов, в деплойменте задано `DEBUG=False`.
