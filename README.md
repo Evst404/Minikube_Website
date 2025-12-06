@@ -83,3 +83,9 @@ $ docker compose build web
 3. Примените манифесты: `kubectl apply -f kubernetes` и дождитесь готовности деплоймента `kubectl wait --for=condition=Available deploy/django-web --timeout=120s`.
 4. Пропишите домен в `/etc/hosts`, чтобы он смотрел на IP Minikube: `echo "$(minikube ip) star-burger.test" | sudo tee -a /etc/hosts`.
 5. Откройте сайт по адресу `http://star-burger.test` — ingress слушает стандартный порт 80, сервис `django` остаётся `ClusterIP` без публичных портов, в деплойменте задано `DEBUG=False`.
+
+### Регулярная очистка сессий
+- Разовый запуск: `kubectl apply -f kubernetes/django-clearsessions-pod.yaml`.
+- Регулярный запуск: `kubectl apply -f kubernetes/django-clearsessions-cronjob.yaml` (по расписанию `0 3 * * *`).
+- Принудительно запустить job из cronjob: `kubectl create job django-clearsessions-once --from=cronjob/django-clearsessions`.
+- Проверить состояние: `kubectl get cronjobs`, `kubectl get jobs`, `kubectl logs job/django-clearsessions-once`.

@@ -40,6 +40,13 @@ kubectl wait --for=condition=Available deploy/django-web --timeout=120s
 - В `Deployment` выставлен `DEBUG="False"`. Для временного включения отладки измените значение и снова выполните `kubectl apply -f kubernetes`.
 - На Docker-драйвере доступ с хоста на порт 80 удобнее организовать через `minikube tunnel` (запускать в отдельном терминале с правами root); в этом случае External IP ingress-контроллера будет `127.0.0.1`, достаточно записи `127.0.0.1 star-burger.test` в `/etc/hosts`.
 
+### Очистка устаревших сессий
+
+- Разовый под: `kubectl apply -f kubernetes/django-clearsessions-pod.yaml` (вызывает `manage.py clearsessions`, не рестартится).
+- Регулярно (cronjob): `kubectl apply -f kubernetes/django-clearsessions-cronjob.yaml` — расписание `0 3 * * *`, `concurrencyPolicy: Forbid`.
+- Принудительно создать job из cronjob: `kubectl create job django-clearsessions-once --from=cronjob/django-clearsessions`.
+- Проверка: `kubectl get cronjobs`, `kubectl get jobs`, `kubectl logs job/django-clearsessions-once`.
+
 ### Проверка
 - Сервисы: `kubectl get svc django` — тип `ClusterIP`, никаких NodePort/LoadBalancer.
 - Ingress: `kubectl get ingress django` — хост `star-burger.test`, порт 80.
