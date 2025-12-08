@@ -47,6 +47,24 @@ kubectl wait --for=condition=Available deploy/django-web --timeout=120s
 - Принудительно создать job из cronjob: `kubectl create job django-clearsessions-once --from=cronjob/django-clearsessions`.
 - Проверка: `kubectl get cronjobs`, `kubectl get jobs`, `kubectl logs job/django-clearsessions-once`.
 
+### PostgreSQL через Helm (для minikube)
+1. Установите Helm (`brew install helm`), добавьте репозиторий Bitnami:  
+   `helm repo add bitnami https://charts.bitnami.com/bitnami && helm repo update`
+2. Установите БД:  
+   `helm install postgresql bitnami/postgresql --set auth.username=test_k8s,auth.password=OwOtBep9Frut,auth.database=test_k8s --wait`
+3. Обновите секрет с новым `DATABASE_URL`:  
+   ```
+   kubectl delete secret django-secret --ignore-not-found
+   kubectl create secret generic django-secret \
+     --from-literal=SECRET_KEY=change-me-in-prod \
+     --from-literal=DATABASE_URL=postgresql://test_k8s:OwOtBep9Frut@postgresql:5432/test_k8s
+   ```
+4. Примените миграции:  
+   `kubectl delete job django-migrate --ignore-not-found && kubectl apply -f kubernetes/django-migrate-job.yaml && kubectl wait --for=condition=complete job/django-migrate --timeout=120s && kubectl logs job/django-migrate`
+5. Перезапустите деплой приложения: `kubectl rollout restart deploy/django-web`.
+6. Проверка psql-клиентом:  
+   `kubectl run postgresql-client --rm --restart=Never --image registry-1.docker.io/bitnami/postgresql:latest --env="PGPASSWORD=OwOtBep9Frut" --command -- psql -h postgresql -U test_k8s -d test_k8s -p 5432 -c "SELECT 1;"`.
+
 ### Проверка
 - Сервисы: `kubectl get svc django` — тип `ClusterIP`, никаких NodePort/LoadBalancer.
 - Ingress: `kubectl get ingress django` — хост `star-burger.test`, порт 80.
